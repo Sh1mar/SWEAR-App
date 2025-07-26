@@ -6,16 +6,11 @@ import supabaseClient from "@/components/supabase/client";
 import { InfoIcon } from "lucide-react";
 import { FetchDataSteps } from "@/components/tutorial/fetch-data-steps";
 import { use, useEffect } from "react";
-import { CheckExistingUser } from "@/components/functions/auth";
 
 export default async function ProtectedPage() {
 //   if (error || !data?.claims) {
 //     redirect("/auth/login");
 //   }
-
-    useEffect(() => {
-        CheckExistingUser()
-    }, []);
 
   return (
     //! Keep this as referenece
