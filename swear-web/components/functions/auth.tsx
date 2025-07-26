@@ -24,4 +24,13 @@ const SignOutUser = async () => {
     console.log(error);
 }
 
-export { CreateNewUser, SignInUser, SignOutUser };
+const CheckExistingUser = async () => {
+    const { data, error } = await supabaseClient.auth.getUser();
+    if (error) {
+        console.error("Error fetching user:", error);
+        return null;
+    }
+    console.log("Current user:", data.user);
+}
+
+export { CreateNewUser, SignInUser, SignOutUser, CheckExistingUser };
