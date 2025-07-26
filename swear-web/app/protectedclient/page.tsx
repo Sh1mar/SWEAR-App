@@ -1,4 +1,5 @@
 "use client";
+
 import { redirect } from "next/navigation";
 
 import supabaseClient from "@/components/supabase/client";
