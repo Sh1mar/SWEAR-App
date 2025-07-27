@@ -1,7 +1,7 @@
 "use client"
 
 import { send } from "process";
-import supabaseClient from "../supabase/client";
+import supabaseClient from "../../supabase/client";
 import { buildPrompt } from "./promt";
 import { addMessage} from "@/redux/dashboard/dashboard";
 
@@ -22,8 +22,6 @@ const CreateChatSession = async (title : string) =>{
             
             if (sessionError) {
                 console.error("Error creating chat session:", sessionError);
-            } else {
-                console.log("Chat session created successfully");
             }
         }
     )
@@ -46,8 +44,6 @@ const CreateChatMessage = async (content : string, chatSessionId: string, role :
             
             if (messageError) {
                 console.error("Error creating chat message:", messageError);
-            } else {
-                console.log("Chat message created successfully");
             }
         }
     )
@@ -70,8 +66,6 @@ const GetAllSessions = async () => {
 
             if (sessionsError) {
                 console.error("Error fetching chat sessions:", sessionsError);
-            } else {
-                console.log("Chat sessions fetched successfully", sessionsData);
             }
         }
     )
@@ -97,7 +91,6 @@ const GetAllMessages = async (sessionId : string) : Promise<any[]> => {
                 console.error("Error fetching chat messages:", chatsError);
                 return [];
             } else {
-                console.log("Chat messages fetched successfully");
                 return chatsData || [];
             }
         }
@@ -121,9 +114,7 @@ const ChatWithASession = async (userResponse : string, session_id : string, mess
     });
 
     const result = await response.json();
-    console.log(result.choices[0].message.content);
     CreateChatMessage(result.choices[0].message.content, session_id, "assistant");
-    // console.log("Message sent to OpenAI and response received:", result.choices[0].message.content);
     return result.choices[0].message.content;
 }
 

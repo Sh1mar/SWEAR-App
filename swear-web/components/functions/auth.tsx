@@ -1,4 +1,4 @@
-import supabaseClient from "../supabase/client";
+import supabaseClient from "../../supabase/client";
 
 //Creates a new user with email and password
 const CreateNewUser = async (email: string, password: string) => {

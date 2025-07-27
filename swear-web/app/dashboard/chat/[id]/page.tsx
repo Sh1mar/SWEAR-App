@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect } from "react";
-import supabaseClient from "@/components/supabase/client";
+import supabaseClient from "@/supabase/client";
 import { SignInUser, SignOutUser } from "@/components/functions/auth";
 import { CreateChatMessage, CreateChatSession, GetAllMessages, GetAllSessions } from "@/components/functions/dashboard";
 import { create } from "domain";
@@ -26,7 +26,6 @@ export default function Page({ params }: Props) {
         dispatch(setCurrentSessionId(id));
         GetAllMessages(id).then((history) => {
             dispatch(setMessages(history));
-            console.log("Messages fetched and set in Redux store:", history);
         });
     }, []);
 
