@@ -1,6 +1,9 @@
 "use client"
 
+import { send } from "process";
 import supabaseClient from "../supabase/client";
+import { buildPrompt } from "./promt";
+import { addMessage} from "@/redux/dashboard/dashboard";
 
 const CreateChatSession = async (title : string) =>{
     supabaseClient.auth.getUser().then(
@@ -26,7 +29,7 @@ const CreateChatSession = async (title : string) =>{
     )
 }
 
-const CreateChatMessage = async (content : string, chatSessionId: string) =>{
+const CreateChatMessage = async (content : string, chatSessionId: string, role : string) =>{
     supabaseClient.auth.getUser().then(
         async ({ data, error }) => {
             if (error) {
@@ -39,7 +42,7 @@ const CreateChatMessage = async (content : string, chatSessionId: string) =>{
             }
             const { data: messageData, error: messageError } = await supabaseClient
                 .from('chatMessage')
-                .insert([{ content: content, session_id: chatSessionId, user_id: data.user.id, sender : "user" }]);
+                .insert([{ content: content, session_id: chatSessionId, user_id: data.user.id, role : role}]);
             
             if (messageError) {
                 console.error("Error creating chat message:", messageError);
@@ -87,7 +90,7 @@ const GetAllMessages = async (sessionId : string) : Promise<any[]> => {
             }
             let { data: chatsData, error: chatsError } = await supabaseClient
             .from('chatMessage')
-            .select('content, id')
+            .select('content, id, role')
             .eq('session_id', sessionId)
 
             if (chatsError) {
@@ -101,4 +104,27 @@ const GetAllMessages = async (sessionId : string) : Promise<any[]> => {
     )
 }
 
-export { CreateChatSession, CreateChatMessage, GetAllSessions, GetAllMessages };
+const ChatWithASession = async (userResponse : string, session_id : string, messages : any[]) => {
+    CreateChatMessage(userResponse, session_id, "user");
+    const prompt = buildPrompt(messages);
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+    },
+     body: JSON.stringify({
+        model: "gpt-4-1106-preview", 
+        messages: prompt,
+        temperature: 0.7,
+    }),
+    });
+
+    const result = await response.json();
+    console.log(result.choices[0].message.content);
+    CreateChatMessage(result.choices[0].message.content, session_id, "assistant");
+    // console.log("Message sent to OpenAI and response received:", result.choices[0].message.content);
+    return result.choices[0].message.content;
+}
+
+export { CreateChatSession, CreateChatMessage, GetAllSessions, GetAllMessages, ChatWithASession };
