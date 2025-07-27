@@ -24,4 +24,16 @@ const SignOutUser = async () => {
     console.log(error);
 }
 
-export { CreateNewUser, SignInUser, SignOutUser };
+const CheckIfAuthenticated = async () => {
+    const { data, error } = await supabaseClient.auth.getUser();
+    if (error) {
+        console.error("Error fetching user:", error);
+        return false;
+    }else if (!data.user) {
+        console.log("No user is authenticated.");
+        return false;
+    }
+    return true;
+}
+
+export { CreateNewUser, SignInUser, SignOutUser, CheckIfAuthenticated };

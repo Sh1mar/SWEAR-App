@@ -5,24 +5,24 @@ import supabaseClient from "../../supabase/client";
 import { buildPrompt } from "./promt";
 import { addMessage} from "@/redux/dashboard/dashboard";
 
-const CreateChatSession = async (title : string) =>{
-    supabaseClient.auth.getUser().then(
+const CreateChatSession = async (title : string) : Promise<string> =>{
+    return supabaseClient.auth.getUser().then(
         async ({ data, error }) => {
             if (error) {
-                console.error("Error fetching user:", error);
-                return;
+                return "";
             }
             if (!data.user) {
-                console.log("No user is authenticated.");
-                return;
+                return "";
             }
             const { data: sessionData, error: sessionError } = await supabaseClient
                 .from('chatSession')
-                .insert([{ title: title, user_id: data.user.id }]);
+                .insert([{ title: title, user_id: data.user.id }])
+                .select();
             
             if (sessionError) {
-                console.error("Error creating chat session:", sessionError);
+                return;
             }
+            return sessionData[0].id;
         }
     )
 }
@@ -49,16 +49,16 @@ const CreateChatMessage = async (content : string, chatSessionId: string, role :
     )
 }
 
-const GetAllSessions = async () => {
-    supabaseClient.auth.getUser().then(
+const GetAllSessions = async () : Promise<any[]> => {
+    return supabaseClient.auth.getUser().then(
         async ({ data, error }) => {
             if (error) {
                 console.error("Error fetching user:", error);
-                return;
+                return [];
             }
             if (!data.user) {
                 console.log("No user is authenticated.");
-                return;
+                return [];
             }
             let { data: sessionsData, error: sessionsError } = await supabaseClient
             .from('chatSession')
@@ -66,7 +66,9 @@ const GetAllSessions = async () => {
 
             if (sessionsError) {
                 console.error("Error fetching chat sessions:", sessionsError);
+                return [];
             }
+            return sessionsData || [];
         }
     )
 }
