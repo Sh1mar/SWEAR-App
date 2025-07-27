@@ -120,4 +120,34 @@ const ChatWithASession = async (userResponse : string, session_id : string, mess
     return result.choices[0].message.content;
 }
 
-export { CreateChatSession, CreateChatMessage, GetAllSessions, GetAllMessages, ChatWithASession };
+const DeleteSession = async (sessionId: string) : Promise<boolean> => {
+
+    return supabaseClient.auth.getUser().then(
+        async ({ data, error }) => {
+            if (error) {
+                return false;
+            }
+            if (!data.user) {
+                return false;
+            }
+            const { error : messagesError } = await supabaseClient
+                .from('chatMessage')
+                .delete()
+                .eq('session_id', sessionId);
+            if (messagesError) {
+                return false;
+            }
+            const { error : sessionError } = await supabaseClient
+                .from('chatSession')
+                .delete()
+                .eq('id', sessionId);
+            if (sessionError) {
+                return false;
+            }
+            console.log("Session deleted successfully");
+            return true;
+        }
+    )
+}
+
+export { CreateChatSession, CreateChatMessage, GetAllSessions, GetAllMessages, ChatWithASession, DeleteSession };

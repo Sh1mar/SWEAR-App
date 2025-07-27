@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import supabaseClient from "@/supabase/client";
 import { CheckIfAuthenticated, SignInUser, SignOutUser } from "@/components/functions/auth";
-import { CreateChatMessage, CreateChatSession, GetAllMessages, GetAllSessions } from "@/components/functions/dashboard";
+import { CreateChatMessage, CreateChatSession, DeleteSession, GetAllMessages, GetAllSessions } from "@/components/functions/dashboard";
 import { create } from "domain";
 import { buildPrompt } from "@/components/functions/promt";
 import { addMessage, setCurrentSessionId, setMessages, setSessions, setUserResponse } from "@/redux/dashboard/dashboard";
@@ -34,6 +34,7 @@ export default function Page() {
           dispatch(setShowContent(true));
           GetAllSessions().then((sessions) => {
             if (sessions.length === 0) {
+              console.log(sessions)
               CreateChatSession("Fresh Start").then((newSessionId) => {
                 if (newSessionId) {
                   router.push(`/dashboard/chat/${newSessionId}`);
@@ -76,6 +77,18 @@ export default function Page() {
   return (
     showContent ? (
       <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+        <div className="flex flex-col w-full max-w-2xl">
+          {allSessions.map((session) => (
+            <button
+              key={session.id}
+              onClick={() => {
+                router.push(`/dashboard/chat/${session.id}`);
+              }}
+            >
+              <p>{session.title}</p>
+            </button>
+          ))}
+        </div>
         <div className="flex flex-col">
           {allMessages.map((message, index) => (
             <div key={index} className={`message ${message.role}`}>
@@ -85,9 +98,12 @@ export default function Page() {
           ))}
           <br></br>
           <br></br>
-          <button onClick={() => handleCreateSession("New Session 4ji3i3")}>Create New Session</button>
+          <button onClick={() => handleCreateSession("New Session")}>Create New Session</button>
           <input onChange={(e) => dispatch(setUserResponse(e.target.value))}></input>
           <button onClick={() => handleChat(currentUserResponse, currentSessionId)}>Send Message</button>
+          <br></br>
+          <br></br>
+          <button onClick={() => DeleteSession(currentSessionId).then(() => router.push("/dashboard/chat/yeehaw"))}>Delete Session</button>
           <br></br>
           <br></br>
           <button onClick={() => SignOutUser().then(() => router.push("/auth/login"))}>Sign Out</button>
