@@ -82,6 +82,9 @@ export default function Page() {
         <button onClick={() => handleCreateSession("New Session 4ji3i3")}>Create New Session</button>
         <input onChange={(e) => dispatch(setUserResponse(e.target.value))}></input>
         <button onClick={() => handleChat(currentUserResponse, currentSessionId)}>Send Message</button>
+        <br></br>
+        <br></br>
+        <button onClick={() => SignOutUser().then(() => router.push("/auth/login"))}>Sign Out</button>
       </div>
     </div>
   );

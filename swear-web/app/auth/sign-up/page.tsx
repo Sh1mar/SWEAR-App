@@ -3,8 +3,12 @@
 import { CreateNewUser } from "@/components/functions/auth";
 import { setUserEmail, setUserPassword } from "@/redux/auth/auth";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+
+  const router = useRouter();
+
   const dispatch = useAppDispatch();
   const userEmail = useAppSelector((state) => state.auth.userEmail);
   const userPassword = useAppSelector((state) => state.auth.userPassword);
@@ -17,7 +21,7 @@ export default function Page() {
         <input onChange={(e) => dispatch(setUserEmail(e.target.value))} type="text" placeholder="Email" />
         <p>Password</p>
         <input onChange={(e) => dispatch(setUserPassword(e.target.value))} type="password" placeholder="Password" />
-        <button onClick={() => CreateNewUser(userEmail, userPassword )}>Sign up</button>
+        <button onClick={() => CreateNewUser(userEmail, userPassword ).then(() => router.push("/dashboard/chat/yeeehaw"))}>Sign up</button>
       </div>
     </div>
   );
