@@ -74,16 +74,16 @@ const GetAllSessions = async () => {
     )
 }
 
-const GetAllMessages = async (sessionId : string) => {
-    supabaseClient.auth.getUser().then(
+const GetAllMessages = async (sessionId : string) : Promise<any[]> => {
+    return supabaseClient.auth.getUser().then(
         async ({ data, error }) => {
             if (error) {
                 console.error("Error fetching user:", error);
-                return;
+                return [];
             }
             if (!data.user) {
                 console.log("No user is authenticated.");
-                return;
+                return [];
             }
             let { data: chatsData, error: chatsError } = await supabaseClient
             .from('chatMessage')
@@ -92,8 +92,10 @@ const GetAllMessages = async (sessionId : string) => {
 
             if (chatsError) {
                 console.error("Error fetching chat messages:", chatsError);
+                return [];
             } else {
-                console.log("Chat messages fetched successfully", chatsData);
+                console.log("Chat messages fetched successfully");
+                return chatsData || [];
             }
         }
     )
