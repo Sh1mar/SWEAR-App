@@ -90,7 +90,7 @@ const GetAllMessages = async (sessionId : string) : Promise<any[]> => {
             .eq('session_id', sessionId)
 
             if (chatsError) {
-                console.error("Error fetching chat messages:", chatsError);
+                console.log("Error fetching chat messages:", chatsError);
                 return [];
             } else {
                 return chatsData || [];
