@@ -1,7 +1,7 @@
 "use client"
 
 import { send } from "process";
-import supabaseClient from "../../supabase/client";
+import {supabaseClient} from "../../supabase/client";
 import { buildPrompt } from "./promt";
 import { addMessage} from "@/redux/dashboard/dashboard";
 
@@ -31,7 +31,7 @@ const CreateChatMessage = async (content : string, chatSessionId: string, role :
     supabaseClient.auth.getUser().then(
         async ({ data, error }) => {
             if (error) {
-                console.error("Error fetching user:", error);
+                console.log("Error fetching user:", error);
                 return;
             }
             if (!data.user) {
@@ -43,7 +43,7 @@ const CreateChatMessage = async (content : string, chatSessionId: string, role :
                 .insert([{ content: content, session_id: chatSessionId, user_id: data.user.id, role : role}]);
             
             if (messageError) {
-                console.error("Error creating chat message:", messageError);
+                console.log("Error creating chat message:", messageError);
             }
         }
     )
@@ -53,7 +53,7 @@ const GetAllSessions = async () : Promise<any[]> => {
     return supabaseClient.auth.getUser().then(
         async ({ data, error }) => {
             if (error) {
-                console.error("Error fetching user:", error);
+                console.log("Error fetching user:", error);
                 return [];
             }
             if (!data.user) {
@@ -65,7 +65,7 @@ const GetAllSessions = async () : Promise<any[]> => {
             .select('title, id')
 
             if (sessionsError) {
-                console.error("Error fetching chat sessions:", sessionsError);
+                console.log("Error fetching chat sessions:", sessionsError);
                 return [];
             }
             return sessionsData || [];
@@ -77,7 +77,7 @@ const GetAllMessages = async (sessionId : string) : Promise<any[]> => {
     return supabaseClient.auth.getUser().then(
         async ({ data, error }) => {
             if (error) {
-                console.error("Error fetching user:", error);
+                console.log("Error fetching user:", error);
                 return [];
             }
             if (!data.user) {
@@ -121,7 +121,6 @@ const ChatWithASession = async (userResponse : string, session_id : string, mess
 }
 
 const DeleteSession = async (sessionId: string) : Promise<boolean> => {
-
     return supabaseClient.auth.getUser().then(
         async ({ data, error }) => {
             if (error) {
@@ -150,4 +149,87 @@ const DeleteSession = async (sessionId: string) : Promise<boolean> => {
     )
 }
 
-export { CreateChatSession, CreateChatMessage, GetAllSessions, GetAllMessages, ChatWithASession, DeleteSession };
+const GetSessionsCount = async () : Promise<number> => {
+    return supabaseClient.auth.getUser().then(
+        async ({ data, error }) => {
+            if (error) {
+                console.log("Error fetching user:", error);
+                return -1;
+            }
+            if (!data.user) {
+                console.log("No user is authenticated.");
+                return -1;
+            }
+            const { count, error: countError } = await supabaseClient
+                .from('chatSession')
+                .select('*', { count: 'exact' });
+            
+            if (countError) {
+                console.log("Error counting chat sessions:", countError);
+                return 0;
+            }
+            return count || 0;
+        }
+    )
+}
+
+const GetLastSessionId = async () : Promise<string> => {
+    return supabaseClient.auth.getUser().then(
+        async ({ data, error }) => {
+            if (error) {
+                console.log("Error fetching user:", error);
+                return "";
+            }
+            if (!data.user) {
+                console.log("No user is authenticated.");
+                return "";
+            }
+            const { data: sessionsData, error: sessionsError } = await supabaseClient
+                .from('chatSession')
+                .select('id')
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            if (sessionsError || !sessionsData || sessionsData.length === 0) {
+                console.log("Error fetching last session ID:", sessionsError);
+                return "";
+            }
+            return sessionsData[0].id;
+        }
+    );
+}
+
+const DeleteAllSessionsAndMessages = async () : Promise<boolean> => {
+    return supabaseClient.auth.getUser().then(
+        async ({ data, error }) => {
+            if (error) {
+                console.log("Error fetching user:", error);
+                return false;
+            }
+            if (!data.user) {
+                console.log("No user is authenticated.");
+                return false;
+            }
+            const { error: messagesError } = await supabaseClient
+                .from('chatMessage')
+                .delete()
+                .eq('user_id', data.user.id);
+            if (messagesError) {
+                console.log("Error deleting chat messages:", messagesError);
+                return false;
+            }
+            const { error: sessionsError } = await supabaseClient
+                .from('chatSession')
+                .delete()
+                .eq('user_id', data.user.id);
+            if (sessionsError) {
+                console.log("Error deleting chat sessions:", sessionsError);
+                return false;
+            }
+            console.log("All sessions deleted successfully");
+            return true;
+        }
+    );
+}
+
+export { CreateChatSession, CreateChatMessage, GetAllSessions, GetAllMessages, ChatWithASession, DeleteSession, GetSessionsCount, GetLastSessionId, DeleteAllSessionsAndMessages };

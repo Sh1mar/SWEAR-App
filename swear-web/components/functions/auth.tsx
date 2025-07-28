@@ -1,4 +1,6 @@
-import supabaseClient from "../../supabase/client";
+import { Sign } from "crypto";
+import {supabaseClient, supabaseAdmin} from "../../supabase/client";
+import { DeleteAllSessionsAndMessages } from "./dashboard";
 
 //Creates a new user with email and password
 const CreateNewUser = async (email: string, password: string) => {
@@ -27,7 +29,7 @@ const SignOutUser = async () => {
 const CheckIfAuthenticated = async () => {
     const { data, error } = await supabaseClient.auth.getUser();
     if (error) {
-        // console.error("Error fetching user:", error);
+        // console.log("Error fetching user:", error);
         return false;
     }else if (!data.user) {
         // console.log("No user is authenticated.");
@@ -36,4 +38,32 @@ const CheckIfAuthenticated = async () => {
     return true;
 }
 
-export { CreateNewUser, SignInUser, SignOutUser, CheckIfAuthenticated };
+const DeleteUser = async () : Promise<boolean> => {
+    return supabaseClient.auth.getUser().then(
+        ({ data, error }) => {
+            const userId = data.user?.id;
+            if (userId && !error) {
+                DeleteAllSessionsAndMessages().then((success) => {
+                    if(success) {
+                        supabaseAdmin.auth.admin.deleteUser(userId).then(
+                        ({ error }) => {
+                            if (error) {
+                                console.log("Error deleting user:", error);
+                                return false;
+                            }
+                            window.location.href = "/auth/login";
+                            return true;
+                        });
+                    }else{
+                        console.log("Failed to delete all sessions and messages.");
+                        return false;
+                    }
+                });
+                
+            }
+            return false;
+        }
+    );
+}
+
+export { CreateNewUser, SignInUser, SignOutUser, CheckIfAuthenticated, DeleteUser };

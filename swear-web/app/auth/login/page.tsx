@@ -21,8 +21,8 @@ export default function Page() {
         <input onChange={(e) => dispatch(setUserEmail(e.target.value))} type="text" placeholder="Email" />
         <p>Password</p>
         <input onChange={(e) => dispatch(setUserPassword(e.target.value))} type="password" placeholder="Password" />
-        <button onClick={() => SignInUser(userEmail, userPassword ).then(() => router.push("/dashboard/chat/yeeehaw"))}>Login</button>
-        
+        <button onClick={() => SignInUser(userEmail, userPassword ).then(() => router.push("/dashboard/chat/lastsession"))}>Login</button>
+
       </div>
     </div>
   );

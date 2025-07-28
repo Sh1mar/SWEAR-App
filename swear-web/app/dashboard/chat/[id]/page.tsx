@@ -1,9 +1,8 @@
 "use client"
 
 import React, { useEffect } from "react";
-import supabaseClient from "@/supabase/client";
-import { CheckIfAuthenticated, SignInUser, SignOutUser } from "@/components/functions/auth";
-import { CreateChatMessage, CreateChatSession, DeleteSession, GetAllMessages, GetAllSessions } from "@/components/functions/dashboard";
+import { CheckIfAuthenticated, SignInUser, SignOutUser, DeleteUser } from "@/components/functions/auth";
+import { CreateChatMessage, CreateChatSession, DeleteSession, GetAllMessages, GetAllSessions, GetLastSessionId, GetSessionsCount } from "@/components/functions/dashboard";
 import { create } from "domain";
 import { buildPrompt } from "@/components/functions/promt";
 import { addMessage, setCurrentSessionId, setMessages, setSessions, setUserResponse } from "@/redux/dashboard/dashboard";
@@ -32,24 +31,35 @@ export default function Page() {
           router.push("/auth/login");
         }else{
           dispatch(setShowContent(true));
-          GetAllSessions().then((sessions) => {
-            if (sessions.length === 0) {
-              console.log(sessions)
-              CreateChatSession("Fresh Start").then((newSessionId) => {
-                if (newSessionId) {
-                  router.push(`/dashboard/chat/${newSessionId}`);
-                }
-              });
-            }else if (!(sessions.find(session => session.id === id))) {
-              router.push(`/dashboard/chat/${sessions[sessions.length - 1].id}`);
-            }else{
-              dispatch(setSessions(sessions));
-              dispatch(setCurrentSessionId(id));
-              GetAllMessages(id).then((history) => {
-                  dispatch(setMessages(history));
-              });
-            }
-          });
+          if(id == "newsession") {
+            CreateChatSession("New Session").then((newSessionId) => {
+              if (newSessionId) {
+                router.push(`/dashboard/chat/${newSessionId}`);
+              }
+            });
+          }else if (id === "lastsession") {
+            GetLastSessionId().then((lastSessionId) => {
+              if (lastSessionId) {
+                router.push(`/dashboard/chat/${lastSessionId}`);
+              }
+            });
+          }else{
+            GetAllSessions().then((sessions) => {
+              if (!(sessions.find(session => session.id === id))) {
+                GetLastSessionId().then((lastSessionId) => {
+                  if (lastSessionId) {
+                    router.push(`/dashboard/chat/${lastSessionId}`);
+                  }
+                });
+              }else{
+                dispatch(setSessions(sessions));
+                dispatch(setCurrentSessionId(id));
+                GetAllMessages(id).then((history) => {
+                    dispatch(setMessages(history));
+                });
+              }
+            });
+          }
         }
       });
     }, []);
@@ -103,10 +113,35 @@ export default function Page() {
           <button onClick={() => handleChat(currentUserResponse, currentSessionId)}>Send Message</button>
           <br></br>
           <br></br>
-          <button onClick={() => DeleteSession(currentSessionId).then(() => router.push("/dashboard/chat/yeehaw"))}>Delete Session</button>
+          <button onClick={() => DeleteSession(currentSessionId).then(() => {
+            GetSessionsCount().then((count) => {
+              if(count <= 0) {
+                CreateChatSession("New Session").then((newSessionId) => {
+                if (newSessionId) {
+                  router.push(`/dashboard/chat/${newSessionId}`);
+                }
+              });
+              }else{
+                GetLastSessionId().then((lastSessionId) => {
+                  router.push(`/dashboard/chat/${lastSessionId}`);
+                });
+              }
+            });
+          })}>Delete Session</button>
           <br></br>
           <br></br>
           <button onClick={() => SignOutUser().then(() => router.push("/auth/login"))}>Sign Out</button>
+          <br></br>
+          <br></br>
+          <button onClick={() => {
+            DeleteUser().then((success) => {
+              if (success) {
+                router.push("/auth/sign-up");
+              } else {
+                console.log("Failed to delete user.");
+              }
+            });
+          }}>Delete User</button>
         </div>
       </div>
     ) : null
