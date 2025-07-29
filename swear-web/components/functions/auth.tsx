@@ -1,5 +1,4 @@
-import { Sign } from "crypto";
-import {supabaseClient, supabaseAdmin} from "../../supabase/client";
+import {supabaseClient} from "../../supabase/client";
 import { DeleteAllSessionsAndMessages } from "./dashboard";
 
 //Creates a new user with email and password
@@ -39,31 +38,37 @@ const CheckIfAuthenticated = async () => {
 }
 
 const DeleteUser = async () : Promise<boolean> => {
-    return supabaseClient.auth.getUser().then(
-        ({ data, error }) => {
-            const userId = data.user?.id;
-            if (userId && !error) {
-                DeleteAllSessionsAndMessages().then((success) => {
-                    if(success) {
-                        supabaseAdmin.auth.admin.deleteUser(userId).then(
-                        ({ error }) => {
-                            if (error) {
-                                console.log("Error deleting user:", error);
-                                return false;
-                            }
-                            window.location.href = "/auth/login";
-                            return true;
-                        });
-                    }else{
-                        console.log("Failed to delete all sessions and messages.");
-                        return false;
-                    }
-                });
-                
-            }
-            return false;
-        }
-    );
+    const { data, error } = await supabaseClient.auth.getUser();
+
+    if (!data.user || error) {
+        console.log("User not found or error fetching user.");
+        return false;
+    }
+
+    const success = await DeleteAllSessionsAndMessages();
+
+    if (!success) {
+        console.log("Failed to delete sessions/messages.");
+        return false;
+    }
+
+    console.log(data.user.id)
+
+    const response = await fetch("/api/delete-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: data.user.id }),
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+        console.log("Failed to delete user:", result.message);
+        return false;
+    }
+
+    window.location.href = "/auth/login";
+    return true;
 }
 
 export { CreateNewUser, SignInUser, SignOutUser, CheckIfAuthenticated, DeleteUser };
