@@ -30,11 +30,10 @@ export default function Page() {
       if(success){
         dispatch(setShowContent(true));
         if(id == "newsession") {
-          CreateChatSession("New Session").then(({data,success}) => {
-            if (success && data) {
-              router.push(`/dashboard/chat/${data}`);
-            }
-          });
+          const {success : didCreateNewSession, data : newSessionId} = await CreateChatSession("New Session");
+          if(didCreateNewSession && newSessionId){
+            router.push(`/dashboard/chat/${newSessionId}`);
+          }
         }else if (id === "lastsession") {
           GetLastSessionId().then(({data, success}) => {
             if (success && data) {
@@ -83,7 +82,10 @@ export default function Page() {
     }
 
     const handleCreateSession = async (title: string) => {
-      router.push(`/dashboard/chat/newsession`);
+      const {success : didCreateNewSession, data : newSessionId} = await CreateChatSession(title);
+      if(didCreateNewSession && newSessionId){
+        router.push(`/dashboard/chat/${newSessionId}`);
+      }
     }
 
     const handleDeleteSession = async (currentSession : string) => {
