@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect } from "react";
-import { CheckIfAuthenticated, SignInUser, SignOutUser, DeleteUser } from "@/components/functions/auth";
+import { SignInUser, SignOutUser, DeleteUser, VerifyValidUser } from "@/components/functions/auth";
 import { CreateChatMessage, CreateChatSession, DeleteSession, GetAllMessages, GetAllSessions, GetLastSessionId, GetSessionsCount } from "@/components/functions/dashboard";
 import { create } from "domain";
 import { buildPrompt } from "@/components/functions/promt";
@@ -24,65 +24,91 @@ export default function Page() {
     const allMessages = useAppSelector((state) => state.dashboard.messages);
     const allSessions = useAppSelector((state) => state.dashboard.sessions);
 
-    useEffect(() => {
+    const LoadContent = async () => {
       const id = params.id as string;
-      CheckIfAuthenticated().then((isUserAuthenticated) => {
-        if (!isUserAuthenticated) {
-          router.push("/auth/login");
+      const {success, error} = await VerifyValidUser();
+      if(success){
+        dispatch(setShowContent(true));
+        if(id == "newsession") {
+          CreateChatSession("New Session").then(({data,success}) => {
+            if (success && data) {
+              router.push(`/dashboard/chat/${data}`);
+            }
+          });
+        }else if (id === "lastsession") {
+          GetLastSessionId().then(({data, success}) => {
+            if (success && data) {
+              router.push(`/dashboard/chat/${data}`);
+            }else{
+              router.push(`/dashboard/chat/newsession`);
+            }
+          });
         }else{
-          dispatch(setShowContent(true));
-          if(id == "newsession") {
-            CreateChatSession("New Session").then((newSessionId) => {
-              if (newSessionId) {
-                router.push(`/dashboard/chat/${newSessionId}`);
-              }
-            });
-          }else if (id === "lastsession") {
-            GetLastSessionId().then((lastSessionId) => {
-              if (lastSessionId) {
-                router.push(`/dashboard/chat/${lastSessionId}`);
-              }
-            });
-          }else{
-            GetAllSessions().then((sessions) => {
-              if (!(sessions.find(session => session.id === id))) {
-                GetLastSessionId().then((lastSessionId) => {
-                  if (lastSessionId) {
-                    router.push(`/dashboard/chat/${lastSessionId}`);
-                  }
-                });
+          GetAllSessions().then(({data, success}) => {
+            if(data && success){
+              if (!(data.find(session => session.id === id))) {
+                router.push(`/dashboard/chat/lastsession`);
               }else{
-                dispatch(setSessions(sessions));
+                dispatch(setSessions(data));
                 dispatch(setCurrentSessionId(id));
-                GetAllMessages(id).then((history) => {
-                    dispatch(setMessages(history));
+                GetAllMessages(id).then(({data : allMessages, error : didGetAllMessages}) => {
+                    if(didGetAllMessages && allMessages){
+                      dispatch(setMessages(allMessages));
+                    }
                 });
               }
-            });
-          }
+            }
+          });
         }
-      });
-    }, []);
+      }else{
+        router.push("/auth/login");
+      }
+    }
 
     const handleChat = async (userResponse : string, session_id : string) => {
-        const res = await ChatWithASession(userResponse, session_id, [...allMessages,{
-          role: "user",
-          content: userResponse,
-        }]);
-        dispatch(addMessage({
-            role : "user",
-            content : userResponse,
-        }))
+      const {data, success} = await ChatWithASession(userResponse, session_id, [...allMessages,{
+        role: "user",
+        content: userResponse,
+      }]);
+      dispatch(addMessage({
+          role : "user",
+          content : userResponse,
+      }))
+      if(success && data){
         dispatch(addMessage({
           role: "assistant",
-          content: res,
-      }));
+          content: data,
+        }));
+      }
     }
 
     const handleCreateSession = async (title: string) => {
-        const res = await CreateChatSession(title);
-        router.push(`/dashboard/chat/${res}`);
+      router.push(`/dashboard/chat/newsession`);
     }
+
+    const handleDeleteSession = async (currentSession : string) => {
+      const {success} = await DeleteSession(currentSession);
+      const {data, success : didGetSessionCount} = await GetSessionsCount();
+      if(success){
+        if(data && didGetSessionCount){
+          if(data <= 0) {
+            CreateChatSession("New Session").then(({data : newSessionId, success : gotNewSessionId}) => {
+              if (newSessionId && gotNewSessionId) {
+                router.push(`/dashboard/chat/${newSessionId}`);
+              }
+            });
+          }else{
+            GetLastSessionId().then((lastSessionId) => {
+              router.push(`/dashboard/chat/${lastSessionId}`);
+            });
+          }
+        }
+      }
+    }
+
+    useEffect(() => {
+      LoadContent();
+    }, []);
 
   return (
     showContent ? (
@@ -113,21 +139,7 @@ export default function Page() {
           <button onClick={() => handleChat(currentUserResponse, currentSessionId)}>Send Message</button>
           <br></br>
           <br></br>
-          <button onClick={() => DeleteSession(currentSessionId).then(() => {
-            GetSessionsCount().then((count) => {
-              if(count <= 0) {
-                CreateChatSession("New Session").then((newSessionId) => {
-                if (newSessionId) {
-                  router.push(`/dashboard/chat/${newSessionId}`);
-                }
-              });
-              }else{
-                GetLastSessionId().then((lastSessionId) => {
-                  router.push(`/dashboard/chat/${lastSessionId}`);
-                });
-              }
-            });
-          })}>Delete Session</button>
+          <button onClick={() => handleDeleteSession(currentSessionId)}>Delete Session</button>
           <br></br>
           <br></br>
           <button onClick={() => SignOutUser().then(() => router.push("/auth/login"))}>Sign Out</button>
@@ -142,6 +154,9 @@ export default function Page() {
               }
             });
           }}>Delete User</button>
+
+          <br></br>
+          <button onClick={() => VerifyValidUser()}>verify</button>
         </div>
       </div>
     ) : null
