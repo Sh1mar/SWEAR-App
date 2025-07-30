@@ -8,11 +8,7 @@ import { error } from "console";
 const VerifyValidUser = async () : Promise<{ error?: string; success?: boolean }> => {
     const { data, error } = await supabaseClient.auth.getUser();
     if (!error && data.user) {
-        if(data.user.email_confirmed_at) {
-            return { success: true, error : "None" };
-        }else{
-            return { error: "Email not confirmed", success: false };
-        }
+        return { success: true, error : "None" };
     }
     return { error: "User not found", success: false };
 }

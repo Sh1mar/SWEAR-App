@@ -16,12 +16,12 @@ export default function Page() {
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
-        <h1>Login</h1>
+        <h1>Sign Up</h1>
         <p>Email</p>
         <input onChange={(e) => dispatch(setUserEmail(e.target.value))} type="text" placeholder="Email" />
         <p>Password</p>
         <input onChange={(e) => dispatch(setUserPassword(e.target.value))} type="password" placeholder="Password" />
-        <button onClick={() => CreateNewUser(userEmail, userPassword ).then(() => router.push("/dashboard/chat/newsession"))}>Sign up</button>
+        <button onClick={() => CreateNewUser(userEmail, userPassword ).then(() => router.push("/auth/verify-email"))}>Sign up</button>
       </div>
     </div>
   );
