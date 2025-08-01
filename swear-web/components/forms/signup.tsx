@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import logo1 from "@/components/images/logo-1.jpeg"
 import Image from "next/image"
-import { SignInUser } from "@/functions/auth"
+import { CreateNewUser } from "@/functions/auth"
 
 type LoginFormProps = {
   changeEmail: (value : string) => void;
@@ -22,7 +22,7 @@ type LoginFormProps = {
   password : string;
 };
 
-export default function LoginForm({ changeEmail, changePassword, email, password, push }: LoginFormProps){
+export default function SignupForm({ changeEmail, changePassword, email, password, push }: LoginFormProps){
     return(
         <div className="flex justify-center">
         <Card
@@ -42,9 +42,9 @@ export default function LoginForm({ changeEmail, changePassword, email, password
             >
             </Image>
             <CardHeader>
-            <CardTitle className="text-white"><p className="text-3xl">Welcome Back!</p></CardTitle>
+            <CardTitle className="text-white"><p className="text-3xl">Get Started Now</p></CardTitle>
             <CardDescription className="text-white">
-                Enter your credentials to access your account
+                Enter your credentials to create your account
             </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -59,12 +59,11 @@ export default function LoginForm({ changeEmail, changePassword, email, password
                 <Input onChange={(e) => changePassword(e.target.value)} id="email" type="password" 
                 className="bg-white text-black rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
-                <a className="w-full text-sm flex flex-row gap-2 mt-2"><p>Forgot password?</p></a>
             </div>
             </CardContent>
             <CardFooter className="flex flex-col">
-                <Button onClick={() => SignInUser(email, password).then(() => push("/dashboard/chat/lastsession"))} className="w-full text-white bg-white/10">Login</Button>
-                <a href="/auth/sign-up" className="w-full text-sm flex flex-row gap-2 mt-2"><p>Don't have an account?</p><p className="font-bold">Sign up</p></a>
+                <Button onClick={() => CreateNewUser(email, password).then(() => push("/auth/verify-email"))} className="w-full text-white bg-white/10">Create Account</Button>
+                <a href="/auth/login" className="w-full text-sm flex flex-row gap-2 mt-2"><p>Already have an account?</p><p className="font-bold">Login</p></a>
             </CardFooter>
         </Card>
         </div>

@@ -15,16 +15,6 @@ export default function Page() {
   const userPassword = useAppSelector((state) => state.auth.userPassword);
 
   return (
-    // <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-    //   <div className="w-full max-w-sm">
-    //     <h1>Login</h1>
-    //     <p>Email</p>
-    //     <input onChange={(e) => dispatch(setUserEmail(e.target.value))} type="text" placeholder="Email" />
-    //     <p>Password</p>
-    //     <input onChange={(e) => dispatch(setUserPassword(e.target.value))} type="password" placeholder="Password" />
-    //     <button onClick={() => SignInUser(userEmail, userPassword ).then(() => router.push("/dashboard/chat/lastsession"))}>Login</button>
-    //   </div>
-    // </div>
-    <LoginForm></LoginForm>
+    <LoginForm changeEmail={(e) => dispatch(setUserEmail(e))} changePassword={(e) => dispatch(setUserPassword(e))} email={userEmail} password={userPassword} push={(e) => router.push(e)}></LoginForm>
   );
 }

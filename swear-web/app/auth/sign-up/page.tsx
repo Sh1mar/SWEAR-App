@@ -1,5 +1,6 @@
 "use client"
 
+import SignupForm from "@/components/forms/signup";
 import { CreateNewUser } from "@/functions/auth";
 import { setUserEmail, setUserPassword } from "@/redux/auth/auth";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
@@ -14,15 +15,16 @@ export default function Page() {
   const userPassword = useAppSelector((state) => state.auth.userPassword);
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <h1>Sign Up</h1>
-        <p>Email</p>
-        <input onChange={(e) => dispatch(setUserEmail(e.target.value))} type="text" placeholder="Email" />
-        <p>Password</p>
-        <input onChange={(e) => dispatch(setUserPassword(e.target.value))} type="password" placeholder="Password" />
-        <button onClick={() => CreateNewUser(userEmail, userPassword ).then(() => router.push("/auth/verify-email"))}>Sign up</button>
-      </div>
-    </div>
+    // <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    //   <div className="w-full max-w-sm">
+    //     <h1>Sign Up</h1>
+    //     <p>Email</p>
+    //     <input onChange={(e) => dispatch(setUserEmail(e.target.value))} type="text" placeholder="Email" />
+    //     <p>Password</p>
+    //     <input onChange={(e) => dispatch(setUserPassword(e.target.value))} type="password" placeholder="Password" />
+    //     <button onClick={() => CreateNewUser(userEmail, userPassword ).then(() => router.push("/auth/verify-email"))}>Sign up</button>
+    //   </div>
+    // </div>
+    <SignupForm changeEmail={(e) => dispatch(setUserEmail(e))} changePassword={(e) => dispatch(setUserPassword(e))} email={userEmail} password={userPassword} push={(e) => router.push(e)}></SignupForm>
   );
 }
