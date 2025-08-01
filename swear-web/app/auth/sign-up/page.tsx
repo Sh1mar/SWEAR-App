@@ -1,6 +1,6 @@
 "use client"
 
-import { CreateNewUser } from "@/components/functions/auth";
+import { CreateNewUser } from "@/functions/auth";
 import { setUserEmail, setUserPassword } from "@/redux/auth/auth";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { useRouter } from "next/navigation";

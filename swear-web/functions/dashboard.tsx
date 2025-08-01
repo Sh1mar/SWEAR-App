@@ -1,7 +1,7 @@
 "use client"
 
 import { send } from "process";
-import {supabaseClient} from "../../supabase/client";
+import { supabaseClient } from "@/supabase/client";
 import { buildPrompt } from "./promt";
 import { addMessage} from "@/redux/dashboard/dashboard";
 import { VerifyValidUser } from "./auth";

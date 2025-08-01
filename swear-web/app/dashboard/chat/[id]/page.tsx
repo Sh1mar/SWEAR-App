@@ -1,13 +1,13 @@
 "use client"
 
 import React, { useEffect } from "react";
-import { SignInUser, SignOutUser, DeleteUser, VerifyValidUser } from "@/components/functions/auth";
-import { CreateChatMessage, CreateChatSession, DeleteSession, GetAllMessages, GetAllSessions, GetLastSessionId, GetSessionsCount } from "@/components/functions/dashboard";
+import { SignInUser, SignOutUser, DeleteUser, VerifyValidUser } from "@/functions/auth";
+import { CreateChatMessage, CreateChatSession, DeleteSession, GetAllMessages, GetAllSessions, GetLastSessionId, GetSessionsCount } from "@/functions/dashboard";
 import { create } from "domain";
-import { buildPrompt } from "@/components/functions/promt";
+import { buildPrompt } from "@/functions/promt";
 import { addMessage, setCurrentSessionId, setMessages, setSessions, setUserResponse } from "@/redux/dashboard/dashboard";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { ChatWithASession } from "@/components/functions/dashboard";
+import { ChatWithASession } from "@/functions/dashboard";
 import { useParams, useRouter } from "next/navigation";
 import { setShowContent } from "@/redux/auth/auth";
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { VerifyValidUser } from "@/components/functions/auth";
+import { VerifyValidUser } from "@/functions/auth";
 import { useRouter } from "next/navigation";
 
 export default function Page() {

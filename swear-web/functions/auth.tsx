@@ -1,5 +1,5 @@
 import { retry } from "@reduxjs/toolkit/query";
-import {supabaseClient} from "../../supabase/client";
+import { supabaseClient } from "@/supabase/client";
 import { DeleteAllSessionsAndMessages } from "./dashboard";
 import { error } from "console";
 
